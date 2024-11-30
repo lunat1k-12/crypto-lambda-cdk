@@ -7,6 +7,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
 
 
 interface LambdaProps {
@@ -24,12 +25,13 @@ export class LambdaStack extends cdk.Stack {
         const secret = secretsmanager.Secret.fromSecretCompleteArn(this, 'CryptoLambdaSecret', 'arn:aws:secretsmanager:us-east-1:918068445959:secret:CryptoLambda-a22a0b')
 
         const cryptoLambda = new lambda.Function(this, 'CryptoLambda', {
-            runtime: lambda.Runtime.JAVA_21, // Adjust Java version as needed
-            handler: 'com.ech.template.handler.LambdaTradeHandler::handleRequest', // Replace with your handler class
+            runtime: lambda.Runtime.JAVA_21,
+            handler: 'com.ech.template.handler.LambdaTradeHandler::handleRequest',
             code: lambda.Code.fromBucket(lambdaProps.bucket, 'BinanceLambda-1.0-SNAPSHOT.jar'),
-            memorySize: 512, // Optional: Adjust memory size
-            timeout: cdk.Duration.seconds(30), // Optional: Adjust timeout
+            memorySize: 512,
+            timeout: cdk.Duration.seconds(30),
             vpc: lambdaProps.vpc,
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
             environment: {
                 BINANCE_LOCAL_DYNAMO: 'false'
             }
