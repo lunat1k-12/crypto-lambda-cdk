@@ -49,7 +49,7 @@ export class LambdaStack extends cdk.Stack {
 
         // EventBridge Rule to trigger Lambda every 5 minutes
         const rule = new events.Rule(this, 'ScheduleCryptoLambdaRule', {
-            schedule: events.Schedule.rate(cdk.Duration.minutes(5)), // 5-minute schedule
+            schedule: events.Schedule.rate(cdk.Duration.minutes(2)), // 2-minute schedule
         });
         rule.addTarget(new targets.LambdaFunction(cryptoLambda));
     }
