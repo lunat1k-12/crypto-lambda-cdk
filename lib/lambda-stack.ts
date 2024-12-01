@@ -8,6 +8,7 @@ import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
 
 interface LambdaProps {
@@ -36,6 +37,11 @@ export class LambdaStack extends cdk.Stack {
                 BINANCE_LOCAL_DYNAMO: 'false'
             }
         });
+
+        cryptoLambda.addToRolePolicy(new iam.PolicyStatement({
+            actions: ['cloudwatch:PutMetricData'],
+            resources: ['*'],
+        }));
 
         lambdaProps.walletTable.grantFullAccess(cryptoLambda)
         lambdaProps.coinOperationTable.grantFullAccess(cryptoLambda)
