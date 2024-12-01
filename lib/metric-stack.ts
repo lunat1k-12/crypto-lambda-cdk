@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import {Construct} from "constructs";
-import {Dashboard, GraphWidget, MathExpression} from "aws-cdk-lib/aws-cloudwatch";
+import {Dashboard, GraphWidget, MathExpression, Metric} from "aws-cdk-lib/aws-cloudwatch";
 import {Duration} from "aws-cdk-lib";
 
 export class MetricStack extends cdk.Stack {
@@ -15,6 +15,41 @@ export class MetricStack extends cdk.Stack {
         const negativeMetric = new MathExpression({
             label: "",
             expression: "SEARCH('{Crypto,CoinName} MetricName=NegativeSellCount', 'Sum', 3600)"
+        });
+
+        const negativeTotalMetric = new Metric({
+            namespace: 'Crypto',
+            metricName: 'NegativeTotalSellCount',
+            period: Duration.hours(1),
+            statistic: 'Sum',
+        });
+
+        const positiveTotalMetric = new Metric({
+            namespace: 'Crypto',
+            metricName: 'PositiveTotalSellCount',
+            period: Duration.hours(1),
+            statistic: 'Sum',
+        });
+
+        const positiveRunningSum = new MathExpression({
+            expression: 'RUNNING_SUM([positive])',
+            usingMetrics: { positive: positiveTotalMetric },
+            label: 'Running Sum of positive transactions',
+            period: Duration.hours(1),
+        });
+
+        const negativeRunningSum = new MathExpression({
+            expression: 'RUNNING_SUM([negative])',
+            usingMetrics: { negative: negativeTotalMetric },
+            label: 'Running Sum of negative transactions',
+            period: Duration.hours(1),
+        });
+
+        const resultRunningSum = new MathExpression({
+            expression: 'RUNNING_SUM([n - p])',
+            usingMetrics: { n: negativeTotalMetric, p:  positiveTotalMetric},
+            label: 'Running Sum of all transactions',
+            period: Duration.hours(1),
         });
 
         new Dashboard(this, "CryptoDashboard", {
@@ -34,6 +69,11 @@ export class MetricStack extends cdk.Stack {
                 period: Duration.days(7),
                 statistic: 'Sum',
                 left: [negativeMetric]
+            }),
+            new GraphWidget({
+                title: 'Running Sum Example',
+                width: 24,
+                left: [positiveRunningSum, negativeRunningSum, resultRunningSum],
             }));
     }
 }
