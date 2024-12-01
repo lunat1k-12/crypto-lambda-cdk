@@ -46,7 +46,7 @@ export class MetricStack extends cdk.Stack {
         });
 
         const resultRunningSum = new MathExpression({
-            expression: 'RUNNING_SUM([n - p])',
+            expression: 'RUNNING_SUM([p - n])',
             usingMetrics: { n: negativeTotalMetric, p:  positiveTotalMetric},
             label: 'Running Sum of all transactions',
             period: Duration.hours(1),
