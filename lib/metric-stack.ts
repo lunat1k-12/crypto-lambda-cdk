@@ -32,24 +32,27 @@ export class MetricStack extends cdk.Stack {
         });
 
         const positiveRunningSum = new MathExpression({
-            expression: 'RUNNING_SUM([positive])',
+            expression: 'SUM([positive])',
             usingMetrics: { positive: positiveTotalMetric },
             label: 'Running Sum of positive transactions',
             period: Duration.hours(1),
+            color: '#6fec6f',
         });
 
         const negativeRunningSum = new MathExpression({
-            expression: 'RUNNING_SUM([negative])',
+            expression: 'SUM([negative])',
             usingMetrics: { negative: negativeTotalMetric },
             label: 'Running Sum of negative transactions',
             period: Duration.hours(1),
+            color: '#e82e2e',
         });
 
         const resultRunningSum = new MathExpression({
-            expression: 'RUNNING_SUM([p - n])',
+            expression: 'p - n',
             usingMetrics: { n: negativeTotalMetric, p:  positiveTotalMetric},
             label: 'Running Sum of all transactions',
             period: Duration.hours(1),
+            color: '#f4bd33',
         });
 
         new Dashboard(this, "CryptoDashboard", {
