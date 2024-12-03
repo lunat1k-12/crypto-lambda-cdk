@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import {Construct} from "constructs";
 import {Dashboard, GraphWidget, MathExpression, Metric} from "aws-cdk-lib/aws-cloudwatch";
 import {Duration} from "aws-cdk-lib";
+import { aws_cloudwatch as cloudwatch } from 'aws-cdk-lib';
 
 export class MetricStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -74,9 +75,18 @@ export class MetricStack extends cdk.Stack {
                 left: [negativeMetric]
             }),
             new GraphWidget({
-                title: 'Running Sum Example',
+                title: 'Running Sum',
                 width: 24,
                 left: [positiveRunningSum, negativeRunningSum, resultRunningSum],
+                leftAnnotations: [
+                    {
+                        value: 0,
+                        label: 'Zero Line',
+                        color: '#a74acd',
+                        fill: cloudwatch.Shading.NONE,
+                        visible: true,
+                    }
+                ]
             }));
     }
 }
