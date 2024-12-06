@@ -9,6 +9,7 @@ import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as logs from 'aws-cdk-lib/aws-logs';
 
 
 interface LambdaProps {
@@ -25,6 +26,13 @@ export class LambdaStack extends cdk.Stack {
 
         const secret = secretsmanager.Secret.fromSecretCompleteArn(this, 'CryptoLambdaSecret', 'arn:aws:secretsmanager:us-east-1:918068445959:secret:CryptoLambda-a22a0b')
 
+        // Create a Log Group for the Lambda function
+        const logGroup = new logs.LogGroup(this, 'MyLambdaLogGroup', {
+            logGroupName: `/aws/lambda/CryptoLambda`, // Custom Log Group name
+            retention: logs.RetentionDays.ONE_WEEK, // Optional: Set retention period
+            removalPolicy: cdk.RemovalPolicy.DESTROY, // Optional: Remove log group on stack deletion
+        });
+
         const cryptoLambda = new lambda.Function(this, 'CryptoLambda', {
             runtime: lambda.Runtime.JAVA_21,
             handler: 'com.ech.template.handler.LambdaTradeHandler::handleRequest',
@@ -35,8 +43,11 @@ export class LambdaStack extends cdk.Stack {
             vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
             environment: {
                 BINANCE_LOCAL_DYNAMO: 'false'
-            }
+            },
+            logGroup: logGroup
         });
+
+        logGroup.grantWrite(cryptoLambda);
 
         cryptoLambda.addToRolePolicy(new iam.PolicyStatement({
             actions: ['cloudwatch:PutMetricData'],
