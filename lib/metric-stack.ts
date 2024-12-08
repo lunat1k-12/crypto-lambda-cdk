@@ -75,8 +75,8 @@ export class MetricStack extends cdk.Stack {
                 left: [negativeMetric]
             }),
             new GraphWidget({
-                title: 'Running Sum',
-                width: 24,
+                title: 'Percentage sells',
+                width: 12,
                 left: [positiveRunningSum, negativeRunningSum, resultRunningSum],
                 leftAnnotations: [
                     {
@@ -87,6 +87,26 @@ export class MetricStack extends cdk.Stack {
                         visible: true,
                     }
                 ]
+            }),
+            new GraphWidget({
+                title: 'Wallet',
+                width: 12,
+                left: [new Metric({
+                    namespace: 'Crypto',
+                    metricName: 'WalletUSDT',
+                    period: Duration.hours(1),
+                    statistic: 'avg',
+                    label: 'AVG',
+                    color: '#6fec6f'
+                }),
+                    new Metric({
+                        namespace: 'Crypto',
+                        metricName: 'WalletUSDT',
+                        period: Duration.hours(1),
+                        statistic: 'max',
+                        label: 'MAX',
+                        color: '#8e2ee8'
+                    })],
             }));
     }
 }
